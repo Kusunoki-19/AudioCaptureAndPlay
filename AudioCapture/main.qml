@@ -2,7 +2,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Window 2.12
-import AudioCapturePlayer 1.0
+import InOutStreamControl 1.0
 
 Window {
     width: 640
@@ -27,14 +27,14 @@ Window {
         //            Item {
         //                anchors.fill: parent
         //                Connections {
-        //                    target:AudioCapturePlayer
+        //                    target:InOutStreamControl
         //                    function onAudioInputDataChanged() {
         //                        audioInputCanvas.requestPaint()
-        //                        console.log(AudioCapturePlayer.audioInputData)
+        //                        console.log(InOutStreamControl.audioInputData)
         //                    }
         //                }
         //                Text {
-        //                    text:AudioCapturePlayer.audioInputData
+        //                    text:InOutStreamControl.audioInputData
         //                }
 
         //                Canvas {

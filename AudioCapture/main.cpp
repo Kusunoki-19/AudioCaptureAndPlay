@@ -1,7 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 
-#include <AudioCapturePlayer.h>
+#include <InOutStreamControl.h>
 
 int main(int argc, char *argv[])
 {
@@ -13,11 +13,11 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
 
-    qmlRegisterSingletonType<AudioCapturePlayer>("AudioCapturePlayer", 1, 0, "AudioCapturePlayer", [](QQmlEngine *engine, QJSEngine *scriptEngine) -> QObject * {
+    qmlRegisterSingletonType<InOutStreamControl>("InOutStreamControl", 1, 0, "InOutStreamControl", [](QQmlEngine *engine, QJSEngine *scriptEngine) -> QObject * {
         Q_UNUSED(engine)
         Q_UNUSED(scriptEngine)
 
-        AudioCapturePlayer *pInstance = new AudioCapturePlayer();
+        InOutStreamControl *pInstance = new InOutStreamControl();
         return pInstance;
     });
 

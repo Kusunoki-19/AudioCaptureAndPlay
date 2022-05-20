@@ -1,24 +1,24 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
-import AudioCapturePlayer 1.0
+import InOutStreamControl 1.0
 
 Slider {
     id:outputVolumeCtrl
     from : 0
     to : 1
     onPressedChanged:  {
-        AudioCapturePlayer.outputVolume = this.value
+        InOutStreamControl.outputVolume = this.value
     }
 
     onValueChanged:  {
-        AudioCapturePlayer.outputVolume = this.value
+        InOutStreamControl.outputVolume = this.value
     }
 
     Connections{
-        target: AudioCapturePlayer
+        target: InOutStreamControl
         function onOutputVolumeChanged () {
             if (!outputVolumeCtrl.pressed) {
-                outputVolumeCtrl.value = AudioCapturePlayer.outputVolume
+                outputVolumeCtrl.value = InOutStreamControl.outputVolume
             }
         }
     }

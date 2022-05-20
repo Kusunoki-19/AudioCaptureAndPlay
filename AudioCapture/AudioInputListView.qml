@@ -2,11 +2,11 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Window 2.12
-import AudioCapturePlayer 1.0
+import InOutStreamControl 1.0
 
 ListView {
     id:audioListView
-    model: AudioCapturePlayer.audioInputDevices
+    model: InOutStreamControl.audioInputDevices
     delegate: Item{
         width:audioListView.width
         height:30
@@ -39,7 +39,7 @@ ListView {
                 Button {
                     text:"select"
                     onClicked : {
-                        AudioCapturePlayer.selectAudioInputDeviceByIndex(modelData.id)
+                        InOutStreamControl.selectAudioInputDeviceByIndex(modelData.id)
                     }
                 }
             }

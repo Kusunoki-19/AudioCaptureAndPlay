@@ -1,8 +1,8 @@
-#include "AudioCapturePlayer.h"
+#include "InOutStreamControl.h"
 
 #include <QDebug>
 
-AudioCapturePlayer::AudioCapturePlayer(QObject *parent) : QObject(parent)
+InOutStreamControl::InOutStreamControl(QObject *parent) : QObject(parent)
 {
     QAudioDeviceInfo info(QAudioDeviceInfo::defaultOutputDevice());
     qDebug() << "-----------------------";
@@ -27,7 +27,7 @@ AudioCapturePlayer::AudioCapturePlayer(QObject *parent) : QObject(parent)
     qDebug() << "-----------------------";
 }
 
-const QVariantList &AudioCapturePlayer::audioInputDevices()
+const QVariantList &InOutStreamControl::audioInputDevices()
 {
     m_inputDevicesInfo = QAudioDeviceInfo::availableDevices(QAudio::AudioInput);
 
@@ -41,7 +41,7 @@ const QVariantList &AudioCapturePlayer::audioInputDevices()
     return m_devicesInfoForQML;
 }
 
-const QVariantList &AudioCapturePlayer::audioOutputDevices()
+const QVariantList &InOutStreamControl::audioOutputDevices()
 {
     m_outputDevicesInfo = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
 
@@ -55,7 +55,7 @@ const QVariantList &AudioCapturePlayer::audioOutputDevices()
     return m_devicesInfoForQML;
 }
 
-void AudioCapturePlayer::selectAudioInputDeviceByIndex(int index)
+void InOutStreamControl::selectAudioInputDeviceByIndex(int index)
 {
     if (index >= m_inputDevicesInfo.length()) {
         return;
@@ -93,10 +93,10 @@ void AudioCapturePlayer::selectAudioInputDeviceByIndex(int index)
     qDebug() << "audioInput.start()";
     m_pInputIO = m_pAudioInput->start();
     m_pInputIO->open(QIODevice::ReadOnly);
-    connect(m_pInputIO, &QIODevice::readyRead, this, &AudioCapturePlayer::onReadyRead);
+    connect(m_pInputIO, &QIODevice::readyRead, this, &InOutStreamControl::onReadyRead);
 }
 
-void AudioCapturePlayer::selectAudioOutputDeviceByIndex(int index)
+void InOutStreamControl::selectAudioOutputDeviceByIndex(int index)
 {
     const QAudioDeviceInfo& selectedDeviceInfo = m_outputDevicesInfo.at(index);
 
@@ -134,7 +134,7 @@ void AudioCapturePlayer::selectAudioOutputDeviceByIndex(int index)
     m_pOutputIO->open(QIODevice::WriteOnly);
 }
 
-void AudioCapturePlayer::onReadyRead()
+void InOutStreamControl::onReadyRead()
 {
     m_audioInputData = m_pInputIO->readAll();
 
@@ -155,7 +155,7 @@ void AudioCapturePlayer::onReadyRead()
 }
 
 
-qreal AudioCapturePlayer::outputVolume() const
+qreal InOutStreamControl::outputVolume() const
 {
     if (m_pAudioOutput) {
         return m_pAudioOutput->volume();
@@ -165,7 +165,7 @@ qreal AudioCapturePlayer::outputVolume() const
     }
 }
 
-void AudioCapturePlayer::setOutputVolume(qreal newOutputVolume)
+void InOutStreamControl::setOutputVolume(qreal newOutputVolume)
 {
     if (m_pAudioOutput) {
         if (qFuzzyCompare(m_pAudioOutput->volume(), newOutputVolume))
@@ -177,7 +177,7 @@ void AudioCapturePlayer::setOutputVolume(qreal newOutputVolume)
     }
 }
 
-const QByteArray &AudioCapturePlayer::audioInputData() const
+const QByteArray &InOutStreamControl::audioInputData() const
 {
     return m_audioInputData;
 }

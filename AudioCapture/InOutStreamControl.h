@@ -11,11 +11,11 @@
 #include <QAudioInput>
 #include <QIODevice>
 
-class AudioCapturePlayer : public QObject
+class InOutStreamControl : public QObject
 {
     Q_OBJECT
 public:
-    explicit AudioCapturePlayer(QObject *parent = nullptr);
+    explicit InOutStreamControl(QObject *parent = nullptr);
 
     // properties.
     // devices info.
