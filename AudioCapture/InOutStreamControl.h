@@ -22,7 +22,7 @@ public:
     explicit InOutStreamControl(QObject *parent = nullptr);
 
     // デバイス一覧.
-    Q_PROPERTY(QList<IODeviceInfo *> audioDevices READ audioDevices NOTIFY audioDevicesChanged)
+    Q_PROPERTY(QList<AudioDevice *> audioDevices READ audioDevices NOTIFY audioDevicesChanged)
     // 入出力デバイス決定.
     Q_PROPERTY(QString inputDeviceName  READ inputDeviceName  NOTIFY inputDeviceNameChanged )
     Q_PROPERTY(QString outputDeviceName READ outputDeviceName NOTIFY outputDeviceNameChanged)
@@ -32,6 +32,22 @@ public:
     Q_PROPERTY(QAudioFormat::SampleType    commonSampleType READ commonSampleType NOTIFY commonSampleTypeChanged )
     Q_PROPERTY(const QString               commonCodec      READ commonCodec      NOTIFY commonCodecChanged      )
 
+    const QList<AudioDevice *> &audioDevices() const;
+    const QString &inputDeviceName() const;
+    const QString &outputDeviceName() const;
+    int commonSampleRate() const;
+    int commonSampleSize() const;
+    QAudioFormat::SampleType commonSampleType() const;
+    const QString &commonCodec() const;
+
+signals:
+    void audioDevicesChanged();
+    void inputDeviceNameChanged();
+    void outputDeviceNameChanged();
+    void commonSampleRateChanged();
+    void commonSampleSizeChanged();
+    void commonSampleTypeChanged();
+    void commonCodecChanged();
 
 private:
     QList<AudioDevice *>        m_pAudioDevices     ;
@@ -69,6 +85,7 @@ signals:
     void supportedChannelCounts();
     void onChannelChanged();
 
+
 public:
     // FOR CPP
 
@@ -83,7 +100,7 @@ public:
     const QString                         &codec()     const;
 
     // 設定変更.
-    bool                                  setCannel      (int                       newChannel)    const;
+    bool                                  setChannel     (int                       newChannel)    const;
     bool                                  setSampleRate  (int                       newSampleRate) const;
     bool                                  setSampleSize  (int                       newSampleSize) const;
     bool                                  setSampleType  (QAudioFormat::SampleType  newSampleType) const;
@@ -99,6 +116,7 @@ public:
     // methods for read/write.
     QVector<double> readoutSamples(bool &isOK) const;
     void writeSamples(const QVector <double> &samples, bool &isOK);
+
 
 private:
     // BYTES <--> SamplesList Converts.
