@@ -11,61 +11,105 @@
 #include <QAudioInput>
 #include <QIODevice>
 
+class InOutStreamControl;
+class AudioDevice;
+
+// 入出力コントロール =============================================================
 class InOutStreamControl : public QObject
 {
     Q_OBJECT
 public:
     explicit InOutStreamControl(QObject *parent = nullptr);
 
-    // properties.
-    // devices info.
-    Q_PROPERTY(QVariantList audioInputDevices READ audioInputDevices NOTIFY audioDevicesChanged)
-    const QVariantList &audioInputDevices() ;
+    // デバイス一覧.
+    Q_PROPERTY(QList<IODeviceInfo *> audioDevices READ audioDevices NOTIFY audioDevicesChanged)
+    // 入出力デバイス決定.
+    Q_PROPERTY(QString inputDeviceName  READ inputDeviceName  NOTIFY inputDeviceNameChanged )
+    Q_PROPERTY(QString outputDeviceName READ outputDeviceName NOTIFY outputDeviceNameChanged)
+    // 入出力共通設定.
+    Q_PROPERTY(int                         commonSampleRate READ commonSampleRate NOTIFY commonSampleRateChanged )
+    Q_PROPERTY(int                         commonSampleSize READ commonSampleSize NOTIFY commonSampleSizeChanged )
+    Q_PROPERTY(QAudioFormat::SampleType    commonSampleType READ commonSampleType NOTIFY commonSampleTypeChanged )
+    Q_PROPERTY(const QString               commonCodec      READ commonCodec      NOTIFY commonCodecChanged      )
 
-    Q_PROPERTY(QVariantList audioOutputDevices READ audioOutputDevices NOTIFY audioDevicesChanged)
-    const QVariantList &audioOutputDevices() ;
-
-    // others.
-    Q_PROPERTY(QByteArray audioInputData READ audioInputData NOTIFY audioInputDataChanged)
-    const QByteArray &audioInputData() const;
-
-    Q_PROPERTY(qreal outputVolume READ outputVolume WRITE setOutputVolume NOTIFY outputVolumeChanged)
-    qreal outputVolume() const;
-    void setOutputVolume(qreal newOutputVolume);
-
-
-    // functions.
-    Q_INVOKABLE void selectAudioInputDeviceByIndex(int index);
-    Q_INVOKABLE void selectAudioOutputDeviceByIndex(int index);
-
-
-signals:
-    void audioDevicesChanged();
-    void outputVolumeChanged();
-    void audioInputDataChanged();
-
-protected:
-
-private slots:
-    void onReadyRead();
 
 private:
-    QList<QAudioDeviceInfo> m_inputDevicesInfo;
-    QList<QAudioDeviceInfo> m_outputDevicesInfo;
-    QVariantList m_devicesInfoForQML;
-
-    QIODevice* m_pInputIO = nullptr;
-    QIODevice* m_pOutputIO = nullptr;
-    QAudioInput* m_pAudioInput = nullptr;
-    QAudioOutput* m_pAudioOutput = nullptr;
-    QAudioFormat m_outputAudioFormat;
-    QAudioFormat m_inputAudioFormat;
-
-    QVariantList m_audioDevices = QVariantList();
-
-
-    QByteArray m_audioInputData;
-    QVariantList m_audioOutputDevices;
+    QList<AudioDevice *>        m_pAudioDevices     ;
+    int                         m_commonSampleRate  ;
+    int                         m_commonSampleSize  ;
+    QAudioFormat::SampleType    m_commonSampleType  ;
+    const QString               m_commonCodec       ;
 };
 
+
+// デバイス単位クラス =============================================================
+class AudioDevice : public QObject
+{
+    Q_OBJECT
+
+    explicit AudioDevice(QAudioDeviceInfo &deviceInfo, QObject *parent = nullptr);
+
+    // FOR QML/CPP.
+    enum AudioDeviceType{
+        InvalidTypeDevice,
+        InputAudioDevice,
+        OutputAudioDevice,
+    };
+    Q_ENUM(AudioDeviceType)
+
+public:
+    Q_PROPERTY(QString name READ name NOTIFY nameChanged)
+    Q_PROPERTY(AudioDevice::AudioDeviceType deviceMode READ deviceMode NOTIFY deviceModeChanged)
+    Q_PROPERTY(QList<int> supportedChannelCounts READ supportedChannelCounts NOTIFY supportedChannelCounts)
+    Q_PROPERTY(int channel READ channel WRITE setChannel NOTIFY onChannelChanged)
+
+signals:
+    void nameChanged();
+    void deviceModeChanged();
+    void supportedChannelCounts();
+    void onChannelChanged();
+
+public:
+    // FOR CPP
+
+    // methods for property.
+    // 直近設定.
+    const QString                         name()       const;
+    AudioDevice::AudioDeviceType          deviceMode() const;
+    int                                   channel()    const;
+    int                                   sampleRate() const;
+    int                                   sampleSize() const;
+    QAudioFormat::SampleType              sampleType() const;
+    const QString                         &codec()     const;
+
+    // 設定変更.
+    bool                                  setCannel      (int                       newChannel)    const;
+    bool                                  setSampleRate  (int                       newSampleRate) const;
+    bool                                  setSampleSize  (int                       newSampleSize) const;
+    bool                                  setSampleType  (QAudioFormat::SampleType  newSampleType) const;
+    bool                                  setCodec       (const QString             newCodec)      const;
+
+    // 対応設定リスト.
+    const QList<int>                      &supportedChannelCounts() const;
+    const QList<int>                      &supportedSampleRates()   const;
+    const QList<int>                      &supportedSampleSizes()   const;
+    const QList<QAudioFormat::SampleType> &supportedSampleTypes()   const;
+    const QStringList                     &supportedCodecs()        const;
+
+    // methods for read/write.
+    QVector<double> readoutSamples(bool &isOK) const;
+    void writeSamples(const QVector <double> &samples, bool &isOK);
+
+private:
+    // BYTES <--> SamplesList Converts.
+    QByteArray &_byteArrayFromSamples(const QVector<double> &samples) const;
+    QVector<double> &_samplesFromBytesArray(const QByteArray &bytes) const;
+
+private:
+    const QAudioDeviceInfo  m_deviceInfo;
+    QAudioFormat            m_audioFormat;
+    QIODevice*              m_pIODevice = nullptr;
+    QAudioInput*            m_pAudioInput = nullptr;
+    QAudioOutput*           m_pAudioOutput = nullptr;
+};
 #endif // AUDIOCAPTUREPLAYER_H
