@@ -2,6 +2,7 @@
 #define AUDIOCAPTUREPLAYER_H
 
 #include <QObject>
+#include <QTimer>
 
 #include <QVariantList>
 
@@ -10,6 +11,8 @@
 #include <QAudioOutput>
 #include <QAudioInput>
 #include <QIODevice>
+
+#include <memory>
 
 class InOutStreamControl;
 class AudioDevice;
@@ -97,37 +100,43 @@ public:
     int                                   sampleRate() const;
     int                                   sampleSize() const;
     QAudioFormat::SampleType              sampleType() const;
-    const QString                         &codec()     const;
+    const QString                         codec()     const;
 
     // 設定変更.
-    bool                                  setChannel     (int                       newChannel)    const;
-    bool                                  setSampleRate  (int                       newSampleRate) const;
-    bool                                  setSampleSize  (int                       newSampleSize) const;
-    bool                                  setSampleType  (QAudioFormat::SampleType  newSampleType) const;
-    bool                                  setCodec       (const QString             newCodec)      const;
+    void                                  setChannel     (int                       newChannel)    ;
+    void                                  setSampleRate  (int                       newSampleRate);
+    void                                  setSampleSize  (int                       newSampleSize);
+    void                                  setSampleType  (QAudioFormat::SampleType  newSampleType);
+    void                                  setCodec       (const QString             newCodec)      ;
 
     // 対応設定リスト.
-    const QList<int>                      &supportedChannelCounts() const;
-    const QList<int>                      &supportedSampleRates()   const;
-    const QList<int>                      &supportedSampleSizes()   const;
-    const QList<QAudioFormat::SampleType> &supportedSampleTypes()   const;
-    const QStringList                     &supportedCodecs()        const;
+    const QList<int>                      supportedChannelCounts() const;
+    const QList<int>                      supportedSampleRates()   const;
+    const QList<int>                      supportedSampleSizes()   const;
+    const QList<QAudioFormat::SampleType> supportedSampleTypes()   const;
+    const QStringList                     supportedCodecs()        const;
 
     // methods for read/write.
     QVector<double> readoutSamples(bool &isOK) const;
     void writeSamples(const QVector <double> &samples, bool &isOK);
 
+    QTimer m_setttingChangePollingTimer;
+
+signals:
+    void formatChanged();
 
 private:
     // BYTES <--> SamplesList Converts.
     QByteArray &_byteArrayFromSamples(const QVector<double> &samples) const;
     QVector<double> &_samplesFromBytesArray(const QByteArray &bytes) const;
+    void _requestApplyCurrentFormat();
+    void _execApplyCurrentFormat();
 
 private:
     const QAudioDeviceInfo  m_deviceInfo;
     QAudioFormat            m_audioFormat;
-    QIODevice*              m_pIODevice = nullptr;
-    QAudioInput*            m_pAudioInput = nullptr;
-    QAudioOutput*           m_pAudioOutput = nullptr;
+    std::shared_ptr<QIODevice> m_pIODevice;
+    std::shared_ptr<QAudioInput> m_pAudioInput;
+    std::shared_ptr<QAudioOutput> m_pAudioOutput;
 };
 #endif // AUDIOCAPTUREPLAYER_H
